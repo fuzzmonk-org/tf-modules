@@ -63,13 +63,14 @@ resource "aws_s3_bucket" "terraform-state-s3" {
 
   tags {
    Name = "${format("%s - terraform remote state in s3", var.project)}"
+   Environment = "${var.project}"
   }
 }
 
 
 # create a dynamodb table for state locking
 resource "aws_dynamodb_table" "terraform-state-lock-dynamodb" {
-  name = "terraform-state-lock-dynamodb-${var.project}"
+  name = "${format("terraform-state-lock-dynamodb-%s", var.project)}"
   read_capacity = 20
   write_capacity = 20
   hash_key = "LockID"
@@ -88,14 +89,3 @@ resource "aws_dynamodb_table" "terraform-state-lock-dynamodb" {
   }
 }
 
-
-
-/*
-output "bucket" {
-  value = "${aws_s3_bucket.terraform-state-s3.id}"
-}
-
-output "dynamodb_table" {
-  value = "${aws_dynamodb_table.terraform-state-lock-dynamodb.id}"
-}
-*/

@@ -187,7 +187,6 @@ resource "aws_route_table" "private_route" {
     nat_gateway_id = "${element(aws_nat_gateway.nat_gw.*.id, count.index)}"
   }
   tags {
-    #Name = "private (nat) route: ${element(aws_nat_gateway.nat_gw.*.id, count.index)}"
     Name = "${format("nat_route-%s", element(aws_nat_gateway.nat_gw.*.id, count.index))}"
   }
 }
@@ -255,86 +254,4 @@ resource "aws_network_acl" "all" {
 
 
 
-/*
-
-###########
-# BASTION
-###########
-variable key_name {}
-variable bastion_ami {}
-
-resource "aws_instance" "bastion" {
-  count = "${length(var.azs)}"
-  ami = "${var.bastion_ami}"
-  instance_type = "t2.micro"
-  associate_public_ip_address = "true"
-  subnet_id = "${element(aws_subnet.public_net.*.id, count.index)}"
-  vpc_security_group_ids = ["${aws_security_group.bastion.id}"]
-  key_name = "${var.key_name}"
-
-  tags {
-    #Name = "bastion_${var.azs[count.index]}"
-    Name = "${format("bastion_%s", var.azs[count.index])}"
-  }
-}
-
-resource "aws_eip" "bastion" {
-  vpc = true
-  depends_on = ["aws_internet_gateway.ig"]
-
-  tags {
-    #Name = "${var.env}_bastion_eip"
-    Name = "${format("%s_bastion_eip", var.env)}"
-  }
-}
-
-resource "aws_eip_association" "eip_assoc" {
-  instance_id   = "${aws_instance.bastion.*.id[0]}"
-  allocation_id = "${aws_eip.bastion.id}"
-}
-
-
-# probably don't need this
-output "bastion_eip_id" {
-  value = "${aws_eip.bastion.id}"
-}
-
-
-resource "aws_security_group" "bastion" {
-  name = "bastion"
-  description = "ssh"
-  vpc_id = "${aws_vpc.vpc.id}"
-
-  ingress {
-    from_port   = "22"
-    to_port     = "22"
-    protocol    = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  lifecycle { create_before_destroy = true }
-
-  tags { 
-    Name = "bastion acl"
-  }
-}
-
-output "bastion_public_ip" {
-  value = "${aws_instance.bastion.*.public_ip}"
-}
-
-*/
 

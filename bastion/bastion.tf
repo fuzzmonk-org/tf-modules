@@ -1,9 +1,3 @@
-# pick a dev/stage/prod vpc to run a bastion box
-# create a single bastion box in an autoscaling group of 1
-# create and associate with eip
-# create security group for icmp and ssh
-
-
 variable azs {default = []}
 variable key_name {}
 variable bastion_ami_owner {} 
@@ -22,7 +16,6 @@ variable iam_instance_profile {}
 ###########
 data "aws_ami" "bastion_ami" {
   most_recent = true
-  #executable_users = ["self"]
   owners = ["${var.bastion_ami_owner}"]
   filter {
     name = "name"
@@ -47,7 +40,6 @@ resource "aws_instance" "bastion" {
 
 resource "aws_eip" "bastion" {
   vpc = true
-  #depends_on = ["var.ig_id"]
 
   tags {
     Name = "${format("%s_bastion_eip", var.bastion_env)}"
@@ -118,7 +110,7 @@ resource "aws_route53_zone" "int_dns" {
   comment = "dns zone managed by terraform"
 }
 
-# will add weighting in the future
+# will move to asg
 resource "aws_route53_record" "bastion_master" {
    #count = "${length(var.azs)}"
    count = 1
